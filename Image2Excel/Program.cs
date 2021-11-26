@@ -17,28 +17,10 @@ namespace Image2Excel
 
             // Parse arguments
             ArgParser parser = new();
-            ParseResult result = parser.TryParse(args);
-            switch (result)
-            {
-                case ParseResult.Success:
-                    break;
-                case ParseResult.Failed:
-                    Console.WriteLine("Invalid argument(s). Check your command again maybe?");
-                    Console.WriteLine($"Found {args.Length} argument(s)");
-                    Console.WriteLine("Run 'Image2Excel --help' for help");
-                    return;
-                case ParseResult.Help:
-                    Console.WriteLine("Syntax: Image2Excel <image-path> <output-path>(optional)");
-                    Console.WriteLine(" - Image2Excel is the path to the executable");
-                    Console.WriteLine(" - <image-path> is the path to source image");
-                    Console.WriteLine(" - <output-path> (optional) is the path to output file");
-                    Console.WriteLine("   *If left out, this will be the image path with '.xlsx' appended*" + Environment.NewLine);
-                    Console.WriteLine("THIS APP HAS SUPER OWO POWER");
-                    return;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(result), "Unknown ParseResult enum value");
-            }
+            bool success = TryParseArgumentHandler(args, ref parser);
+            if (!success) return;
 
+            // Check if input paths are legit
             if (!File.Exists(parser.ImagePath))
             {
                 Console.WriteLine("Cannot find/read image file at provided path.");
@@ -69,6 +51,37 @@ namespace Image2Excel
 
             Console.WriteLine(parser.ImagePath);
             Console.WriteLine(parser.OutputPath);
+        }
+
+        /// <summary>
+        /// Parse the arguments list and handle result
+        /// </summary>
+        /// <param name="args">Arguments list</param>
+        /// <param name="parser"><see cref="ArgParser"/> parser object</param>
+        /// <returns><see langword="true"/> if parsed successfully, <see langword="false"/> otherwise</returns>
+        static bool TryParseArgumentHandler(string[] args, ref ArgParser parser)
+        {
+            ParseResult result = parser.TryParse(args);
+            switch (result)
+            {
+                case ParseResult.Success:
+                    return true;
+                case ParseResult.Failed:
+                    Console.WriteLine("Invalid argument(s). Check your command again maybe?");
+                    Console.WriteLine($"Found {args.Length} argument(s)");
+                    Console.WriteLine("Run 'Image2Excel --help' for help");
+                    return false;
+                case ParseResult.Help:
+                    Console.WriteLine("Syntax: Image2Excel <image-path> <output-path>(optional)");
+                    Console.WriteLine(" - Image2Excel is the path to the executable");
+                    Console.WriteLine(" - <image-path> is the path to source image");
+                    Console.WriteLine(" - <output-path> (optional) is the path to output file");
+                    Console.WriteLine("   *If left out, this will be the image path with '.xlsx' appended*" + Environment.NewLine);
+                    Console.WriteLine("THIS APP HAS SUPER OWO POWER");
+                    return false;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(result), "Unknown ParseResult enum value");
+            }
         }
     }
 }
