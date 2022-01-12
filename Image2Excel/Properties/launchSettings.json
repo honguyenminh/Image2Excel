@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Image2Excel": {
+      "commandName": "Project",
+      "commandLineArgs": "assets\\test.png",
+      "workingDirectory": "C:\\project\\Image2Excel\\Image2Excel\\bin\\Debug\\net5.0"
+    }
+  }
+}
