@@ -14,8 +14,8 @@ namespace Image2Excel
     }
     class ArgParser
     {
-        public string ImagePath { get; private set; }
-        public string OutputPath { get; private set; }
+        public string? ImagePath { get; private set; }
+        public string? OutputPath { get; private set; }
 
         public ParseResult TryParse(string[] args)
         {
