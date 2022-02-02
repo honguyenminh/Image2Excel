@@ -11,25 +11,26 @@ public static class Program
     private static void Main(string[] args)
     {
         Console.WriteLine("Image2Excel " + VersionTags.Version);
-        Console.WriteLine("GitHub: https://github.com/honguyenminh/Image2Excel" + Environment.NewLine);
+        Console.WriteLine("GitHub: https://github.com/honguyenminh/Image2Excel");
+        Console.WriteLine("---------------------------------------------------");
 
         // Parse arguments
-        ArgParser parser = new();
-        bool success = TryParseArgumentHandler(args, ref parser);
+        ConsoleHandler console = new();
+        bool success = console.TryParse(args);
         if (!success) return;
 
         // Check if input paths are legit
-        if (!File.Exists(parser.ImagePath))
+        if (!File.Exists(console.ImagePath))
         {
             Console.WriteLine("Cannot find/read image file at provided path.");
             return;
         }
-        if (File.Exists(parser.OutputPath))
+        if (File.Exists(console.OutputPath))
         {
             Console.WriteLine("Output file already existed.");
-            Console.WriteLine("Output path: " + parser.OutputPath);
+            Console.WriteLine("Output path: " + console.OutputPath);
             Console.Write("Do you want to overwrite this file? [y/N]: ");
-            switch (Console.ReadLine()?.ToLower())
+            switch (Console.ReadLine()?.ToLower().Trim())
             {
                 // Default is no
                 case "":
@@ -44,13 +45,13 @@ public static class Program
                     Console.WriteLine("Aborted operation. Have a nice day~");
                     return;
             }
-            File.Delete(parser.OutputPath);
+            File.Delete(console.OutputPath);
         }
 
         // Process image
         Dictionary<string, int> fillStyleIdSet = new();
         StringBuilder colorStyles = new();
-        using Image<Rgb24> img = Image.Load<Rgb24>("test.png");
+        using Image<Rgb24> img = Image.Load<Rgb24>("test.png"); // TODO: replace this
         for (int y = 0; y < img.Height; y++)
         {
             if (fillStyleIdSet.Count > 255)
@@ -68,37 +69,6 @@ public static class Program
                 colorStyles.Append(ToHex(row[x]));
                 colorStyles.Append("\"/><bgColor indexed=\"64\"/></patternFill></fill>");
             }
-        }
-    }
-
-    /// <summary>
-    /// Parse the arguments list and handle result
-    /// </summary>
-    /// <param name="args">Arguments list</param>
-    /// <param name="parser"><see cref="ArgParser"/> parser object</param>
-    /// <returns><see langword="true"/> if parsed successfully, <see langword="false"/> otherwise</returns>
-    private static bool TryParseArgumentHandler(string[] args, ref ArgParser parser)
-    {
-        ParseResult result = parser.TryParse(args);
-        switch (result)
-        {
-            case ParseResult.Success:
-                return true;
-            case ParseResult.Failed:
-                Console.WriteLine("Invalid argument(s). Check your command again maybe?");
-                Console.WriteLine($"Found {args.Length} argument(s)");
-                Console.WriteLine($"Run 'Image2Excel --help' for help");
-                return false;
-            case ParseResult.Help:
-                Console.WriteLine("Syntax: <Image2Excel> <image-path> <output-path>(optional)");
-                Console.WriteLine(" - <Image2Excel> is the path to the executable");
-                Console.WriteLine(" - <image-path> is the path to source image");
-                Console.WriteLine(" - <output-path> (optional) is the path to output file");
-                Console.WriteLine("   *If left out, output path will be the image path with '.xlsx' appended*" + Environment.NewLine);
-                Console.WriteLine("THIS APP HAS SUPER OWO POWER");
-                return false;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(result), "Unknown ParseResult enum value");
         }
     }
 
