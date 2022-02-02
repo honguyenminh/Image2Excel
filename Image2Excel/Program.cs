@@ -1,6 +1,4 @@
 ﻿using System.Text;
-using System.Reflection;
-using System.Resources;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -73,19 +71,7 @@ public static class Program
     }
 
     private static string ToHex(Rgb24 color)
-        => color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
-
-    private static string GetEmbeddedResourceContent(string resourceName)
     {
-        var asm = Assembly.GetExecutingAssembly();
-        var stream = asm.GetManifestResourceStream(resourceName);
-        if (stream is null) 
-            throw new MissingManifestResourceException("Cannot find resource " + resourceName);
-
-        StreamReader source = new(stream);
-        string fileContent = source.ReadToEnd();
-        source.Dispose();
-        stream.Dispose();
-        return fileContent;
+        return color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
     }
 }

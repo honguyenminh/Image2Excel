@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="res\**" />
+    <EmbeddedResource Include="Resource\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +35,11 @@
     <None Update="assets\test.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Resource\FileInit" />
   </ItemGroup>
 
 </Project>
