@@ -13,7 +13,7 @@ internal class ConsoleHandler
     public bool TryParse(string[] args)
     {
         #if DEBUG
-        ImagePath = "demo.png";
+        ImagePath = "test.png";
         OutputPath = "out.xlsx";
         return true;
         #endif

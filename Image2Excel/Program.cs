@@ -46,31 +46,13 @@ public static class Program
             File.Delete(console.OutputPath);
         }
 
-        // Process image
-        Dictionary<string, int> fillStyleIdSet = new();
-        StringBuilder colorStyles = new();
-        using Image<Rgb24> img = Image.Load<Rgb24>("test.png"); // TODO: replace this
-        for (int y = 0; y < img.Height; y++)
-        {
-            if (fillStyleIdSet.Count > 255)
-            {
-                Console.WriteLine("Too many colors. Max is 256 (blame Excel owo)");
-                return;
-            }
-    
-            Span<Rgb24> row = img.GetPixelRowSpan(y);
-            for (int x = 0; x < img.Width; x++)
-            {
-                if (fillStyleIdSet.ContainsKey(ToHex(row[x]))) continue;
-                fillStyleIdSet.Add(ToHex(row[x]), fillStyleIdSet.Count);
-                colorStyles.Append("<fill><patternFill patternType=\"solid\"><fgColor rgb=\"");
-                colorStyles.Append(ToHex(row[x]));
-                colorStyles.Append("\"/><bgColor indexed=\"64\"/></patternFill></fill>");
-            }
-        }
+        using Image<Rgb24> image = Image.Load<Rgb24>(console.ImagePath);
+
+        using ExcelHandler xl = new();
+        xl.WriteStyles(image);
     }
 
-    private static string ToHex(Rgb24 color)
+    public static string ToHex(this Rgb24 color)
     {
         return color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
     }

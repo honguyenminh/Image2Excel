@@ -39,7 +39,13 @@
 
   <ItemGroup>
     <Folder Include="Properties" />
-    <Folder Include="Resource\FileInit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resource\Parts\sheet1.xml\bottom.txt" />
+    <Content Include="Resource\Parts\sheet1.xml\head.txt" />
+    <Content Include="Resource\Parts\styles.xml\bottom.txt" />
+    <Content Include="Resource\Parts\styles.xml\mid.txt" />
   </ItemGroup>
 
 </Project>

@@ -36,7 +36,7 @@ internal static class ResourceManager
     public static void WriteResourceToFile(string resourcePath, string filePath)
     {
         using var resourceStream = GetResourceStream(resourcePath);
-        var fileStream = File.OpenWrite(filePath);
+        using var fileStream = File.OpenWrite(filePath);
         resourceStream.CopyTo(fileStream);
     }
 }
