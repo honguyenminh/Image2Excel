@@ -22,7 +22,7 @@ internal class ConsoleHandler
         }
         if (ans.ToLower() != "n")
         {
-            ImagePath = "test.png";
+            ImagePath = "Assets/test.png";
             OutputPath = "out.xlsx";
             return true;
         }

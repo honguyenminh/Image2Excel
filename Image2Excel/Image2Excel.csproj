@@ -32,10 +32,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="assets\test.png">
+    <None Update="Assets\test.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="assets\test5x5.png">
+    <None Update="Assets\test5x5.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
