@@ -12,11 +12,21 @@ internal class ConsoleHandler
     /// <returns>true if parsed successfully, false otherwise</returns>
     public bool TryParse(string[] args)
     {
-        #if DEBUG
-        ImagePath = "test.png";
-        OutputPath = "out.xlsx";
-        return true;
-        #endif
+#if DEBUG
+        Console.Write("DEBUG? [Y/n]: ");
+        string? ans = Console.ReadLine();
+        if (ans is null)
+        {
+            Console.WriteLine("u not serious im going home uwu");
+            return false;
+        }
+        if (ans.ToLower() != "n")
+        {
+            ImagePath = "test.png";
+            OutputPath = "out.xlsx";
+            return true;
+        }
+#endif
         // Help
         if (args.Contains("-h") || args.Contains("--help"))
         {
@@ -55,8 +65,8 @@ internal class ConsoleHandler
     }
     private static void WriteInvalidArgs(int argsCount)
     {
-        Console.WriteLine("Invalid argument(s). Check your command again maybe?");
-        Console.WriteLine($"Found {argsCount} argument(s)");
-        Console.WriteLine("Run 'Image2Excel --help' for help");
+        Console.WriteLine("[Error] Invalid argument(s). Check your command again maybe?");
+        Console.WriteLine($"        Found {argsCount} argument(s)");
+        Console.WriteLine("        Run 'Image2Excel --help' for help");
     }
 }
