@@ -1,5 +1,4 @@
-﻿using System.Text;
-using SixLabors.ImageSharp;
+﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace Image2Excel;
@@ -51,44 +50,73 @@ public static class Program
             File.Delete(consoleHandler.OutputPath);
         }
 
-        using Image<Rgba32> image = Image.Load<Rgba32>(consoleHandler.ImagePath);
+        using Image<Rgba32> image = Image.Load<Rgba32>(consoleHandler.ImagePath); // TODO: handle error here
 
-        // TODO: add verbose toggle
+        bool quantizeImage = false; // TODO: add option to switch this
         try
         {
             Console.Write("[Info]  Writing metadata...");
-            using ExcelHandler xl = new();
+            ExcelHandler xl = new();
             Console.WriteLine(" Done.");
-            
+
             Console.Write("[Info*] Temp folder is at: ");
             Console.WriteLine(xl.TempDirectoryPath);
-            
+
+            WriteStylesAgain: // I am sorry
+            if (quantizeImage)
+            {
+                Console.Write("[Info]  Quantizing color...");
+                image.QuantizeColorWu(); // TODO: add option to change the dither algo and octree/wu
+                Console.WriteLine(" Done.");
+            }
+
             Console.Write("[Info]  Writing styles...");
-            xl.WriteStyles(image);
-            Console.WriteLine(" Done.");
-            
+            try
+            {
+                xl.WriteStyles(image);
+                Console.WriteLine(" Done.");
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                // Too many colors
+                Console.WriteLine();
+                Console.WriteLine("[Error] Image file exceeded Excel's limitations.");
+                Console.Write("        ");
+                Console.WriteLine(e.Message);
+
+                Console.Write("Try again with color quantizing? [Y/n]: ");
+                string ans = Console.ReadLine()!.ToLower().Trim();
+                if (ans != "y" && ans != "")
+                {
+                    Console.WriteLine("[DONE]  Operation aborted. Have a nice day owo");
+                    return;
+                }
+
+                quantizeImage = true;
+                goto WriteStylesAgain;
+            }
+
             Console.Write("[Info]  Writing sheet...");
             xl.WriteSheet(image);
             Console.WriteLine(" Done.");
+
             Console.Write("[Info]  Compressing to package...");
             xl.Save(consoleHandler.OutputPath);
             Console.WriteLine(" Done.");
             
+            Console.Write("[Info]  Cleaning up temp folder...");
+            xl.Dispose();
+            Console.WriteLine(" Done.");
+
             Console.WriteLine("[DONE]  All done, my master! owo");
         }
-        catch (ArgumentOutOfRangeException e)
+        catch (Exception e)
         {
             Console.WriteLine();
-            Console.WriteLine("[Error] Image file exceeded Excel's limitations.");
+            Console.WriteLine("[Error] Oopsie! Unknown exception thrown.");
+            Console.WriteLine("[Error] We don't know what went wrong yet, but here's the details:");
             Console.Write("        ");
             Console.WriteLine(e.Message);
         }
-        // TODO: add other errors exception handler here
-    }
-
-    public static string ToArgbHex(this Rgba32 color)
-    {
-        uint hexOrder = (uint)(color.B << 0 | color.G << 8 | color.R << 16 | color.A << 24);
-        return hexOrder.ToString("X8");
     }
 }

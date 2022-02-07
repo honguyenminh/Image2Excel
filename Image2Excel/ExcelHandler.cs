@@ -76,26 +76,28 @@ public class ExcelHandler : IDisposable
     /// <summary>
     /// Write styles file for the given image
     /// </summary>
-    /// <param name="image"></param>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <param name="image">Image to get color styles from</param>
+    /// <exception cref="ArgumentOutOfRangeException">Too many colors in image</exception>
     public void WriteStyles(Image<Rgba32> image)
     {
-        // Add all colors to dictionary and styles
+        // The fill/cell styles strings to write to styles.xml
+        // TODO: save these to separate temp file
         StringBuilder fillStyles = new();
         StringBuilder cellStyles = new();
 
         for (int y = 0; y < image.Height; y++)
         {
-            if (_cellStyleId.Count > 255)
-            {
-                throw new ArgumentOutOfRangeException(nameof(image),
-                    "Too many colors. Max is 256 (blame Excel owo)");
-            }
-
             // TODO: add default colors from excel here to avoid duplication
             Span<Rgba32> row = image.GetPixelRowSpan(y);
             for (int x = 0; x < image.Width; x++)
             {
+                if (_cellStyleId.Count > 256)
+                {
+                    _cellStyleId.Clear();
+                    throw new ArgumentOutOfRangeException(nameof(image), 
+                        "Too many colors. Max is 256 (blame Excel owo)");
+                }
+
                 string hexCode = row[x].ToArgbHex();
                 if (_cellStyleId.ContainsKey(hexCode)) continue;
 
