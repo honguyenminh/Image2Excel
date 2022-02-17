@@ -1,4 +1,4 @@
-﻿namespace Image2Excel;
+﻿namespace Image2Excel.Legacy;
 
 internal class ConsoleHandler
 {
@@ -55,8 +55,8 @@ internal class ConsoleHandler
     // Move these into "Resource" folder if needed
     private static void WriteHelp()
     {
-        Console.WriteLine("Syntax: <Image2Excel> <image-path> <output-path>(optional)");
-        Console.WriteLine(" - <Image2Excel> is the path to the executable");
+        Console.WriteLine("Syntax: <Image2Excel.Legacy> <image-path> <output-path>(optional)");
+        Console.WriteLine(" - <Image2Excel.Legacy> is the path to the executable");
         Console.WriteLine(" - <image-path> is the path to source image");
         Console.WriteLine(" - <output-path> (optional) is the path to output file");
         Console.WriteLine("   *If left out, output path will be the image path with '.xlsx' appended*");
@@ -67,6 +67,6 @@ internal class ConsoleHandler
     {
         Console.WriteLine("[Error] Invalid argument(s). Check your command again maybe?");
         Console.WriteLine($"        Found {argsCount} argument(s)");
-        Console.WriteLine("        Run 'Image2Excel --help' for help");
+        Console.WriteLine("        Run 'Image2Excel.Legacy --help' for help");
     }
 }

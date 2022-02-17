@@ -1,4 +1,4 @@
-namespace Image2Excel;
+namespace Image2Excel.Legacy;
 
 public static class VersionTags
 {

@@ -1,14 +1,14 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace Image2Excel;
+namespace Image2Excel.Legacy;
 
 public static class Program
 {
     private static void Main(string[] args)
     {
-        Console.WriteLine("Image2Excel " + VersionTags.Version);
-        Console.WriteLine("GitHub: https://github.com/honguyenminh/Image2Excel");
+        Console.WriteLine("Image2Excel.Legacy " + VersionTags.Version);
+        Console.WriteLine("GitHub: https://github.com/honguyenminh/Image2Excel.Legacy");
         if (VersionTags.IsPreRelease)
         {
             Console.WriteLine("THIS IS A PRE-RELEASE, FEATURES MIGHT BE UNSTABLE!");

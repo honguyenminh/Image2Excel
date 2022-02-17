@@ -3,7 +3,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System.IO.Compression;
 
-namespace Image2Excel;
+namespace Image2Excel.Legacy;
 
 public class ExcelHandler : IDisposable
 {

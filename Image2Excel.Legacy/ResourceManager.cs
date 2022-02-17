@@ -1,11 +1,11 @@
 using System.Reflection;
 using System.Resources;
 
-namespace Image2Excel;
+namespace Image2Excel.Legacy;
 
 internal static class ResourceManager
 {
-    private const string ResPathPrefix = "Image2Excel.Resource.";
+    private const string ResPathPrefix = "Image2Excel.Legacy.Resource.";
     private static readonly Assembly s_assembly = typeof(Program).Assembly;
 
     /// <summary>
