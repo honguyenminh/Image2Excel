@@ -9,7 +9,7 @@ public class ExcelHandler : IDisposable
 {
     public string TempDirectoryPath { get; }
     private readonly Dictionary<string, int> _cellStyleId = new();
-    
+
     public ExcelHandler()
     {
         // Get a non-existing temporary directory name
