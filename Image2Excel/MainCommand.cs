@@ -64,22 +64,24 @@ internal class MainCommand
             }
         }
 
-        PackageFileCreator package;
-        try
-        {
-            package = new PackageFileCreator(p.InputPath);
-        }
-        catch (ConstraintException e)
-        {
-            // Too many colors
-            _logger.LogError("Image file exceeded Excel's limitations.");
-            _logger.Log(LogLevel.None, e.Message);
-            _logger.LogInformation("Geez, what is that image?");
-            return;
-        }
+
 
         try
         {
+            PackageFileCreator package;
+            try
+            {
+                package = new PackageFileCreator(p.InputPath);
+            }
+            catch (ConstraintException e)
+            {
+                // Too many colors
+                _logger.LogError("Image file exceeded Excel's limitations.");
+                _logger.Log(LogLevel.None, e.Message);
+                _logger.LogInformation("Geez, what is that image?");
+                return;
+            }
+
             _logger.Log(LogLevel.Information, "Writing metadata...", false);
             package.WriteMetadata(_version);
             Console.WriteLine(" Done.");
