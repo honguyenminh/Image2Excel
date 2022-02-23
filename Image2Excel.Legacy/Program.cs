@@ -1,5 +1,4 @@
-﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+﻿using Image2Excel.Core;
 
 namespace Image2Excel.Legacy;
 
@@ -7,9 +6,10 @@ public static class Program
 {
     private static void Main(string[] args)
     {
-        Console.WriteLine("Image2Excel.Legacy " + VersionTags.Version);
+        Version version = new();
+        Console.WriteLine("Image2Excel.Legacy " + version.VersionString);
         Console.WriteLine("GitHub: https://github.com/honguyenminh/Image2Excel.Legacy");
-        if (VersionTags.IsPreRelease)
+        if (version.IsPreRelease)
         {
             Console.WriteLine("THIS IS A PRE-RELEASE, FEATURES MIGHT BE UNSTABLE!");
             Console.WriteLine("you have been warned uwu");
@@ -50,13 +50,13 @@ public static class Program
             File.Delete(consoleHandler.OutputPath);
         }
 
-        using Image<Rgba32> image = Image.Load<Rgba32>(consoleHandler.ImagePath); // TODO: handle error here
-
         bool quantizeImage = false; // TODO: add option to switch this
         try
         {
+            PackageFileCreator xl = new(consoleHandler.ImagePath);
+            
             Console.Write("[Info]  Writing metadata...");
-            ExcelHandler xl = new();
+            xl.WriteMetadata(version);
             Console.WriteLine(" Done.");
 
             Console.Write("[Info*] Temp folder is at: ");
@@ -66,14 +66,14 @@ public static class Program
             if (quantizeImage)
             {
                 Console.Write("[Info]  Quantizing color...");
-                image.QuantizeColorWu(); // TODO: add option to change the dither algo and octree/wu
+                // TODO: add image quantizing here
                 Console.WriteLine(" Done.");
             }
 
             Console.Write("[Info]  Writing styles...");
             try
             {
-                xl.WriteStyles(image);
+                xl.WriteStyles();
                 Console.WriteLine(" Done.");
             }
             catch (ArgumentOutOfRangeException e)
@@ -97,7 +97,7 @@ public static class Program
             }
 
             Console.Write("[Info]  Writing sheet...");
-            xl.WriteSheet(image);
+            xl.WriteSheet();
             Console.WriteLine(" Done.");
 
             Console.Write("[Info]  Compressing to package...");
