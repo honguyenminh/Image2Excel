@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Image2Excel.Legacy", "Image
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Image2Excel", "Image2Excel\Image2Excel.csproj", "{A9D5AF29-2960-43CC-9A10-662E51A74871}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Image2Excel.Core", "Image2Excel.Core\Image2Excel.Core.csproj", "{B96BE49D-A897-42F9-AC1E-54E5282A0344}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A9D5AF29-2960-43CC-9A10-662E51A74871}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9D5AF29-2960-43CC-9A10-662E51A74871}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9D5AF29-2960-43CC-9A10-662E51A74871}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B96BE49D-A897-42F9-AC1E-54E5282A0344}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B96BE49D-A897-42F9-AC1E-54E5282A0344}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B96BE49D-A897-42F9-AC1E-54E5282A0344}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B96BE49D-A897-42F9-AC1E-54E5282A0344}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
