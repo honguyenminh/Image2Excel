@@ -100,7 +100,11 @@ public class ConsoleLogger
                 i += lineLength;
             }
         }
-        else Console.WriteLine(message);
+        else
+        {
+            if (newLine) Console.WriteLine(message);
+            else Console.Write(message); 
+        }
 
         Console.ResetColor();
     }

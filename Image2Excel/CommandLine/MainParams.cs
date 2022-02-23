@@ -1,4 +1,5 @@
 using Cocona;
+using Image2Excel.Core;
 
 namespace Image2Excel.CommandLine;
 
@@ -18,4 +19,16 @@ public class MainParams : ICommandParameterSet
     [HasDefaultValue]
     [Argument(Description = "Output Excel file path. If left out will default to input path with \".xlsx\" appended")]
     public string? OutputPath { get; set; }
+
+    [HasDefaultValue]
+    [Option(Description = "Quantize method to use")]
+    public QuantizeMethod QuantizeMethod { get; set; } = QuantizeMethod.Wu;
+
+    [HasDefaultValue]
+    [Option(Description = "Adjust the amount of dither (0 to 1)")]
+    public float DitherScale { get; set; } = 0.75f;
+    
+    [HasDefaultValue]
+    [Option(Description = "Set the dithering method used to quantize image")]
+    public DitherMethod DitherMethod { get; set; } = DitherMethod.FloydSteinberg;
 }

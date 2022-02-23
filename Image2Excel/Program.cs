@@ -1,4 +1,5 @@
 ﻿using Cocona;
+using Image2Excel;
 using Image2Excel.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 
