@@ -5,6 +5,8 @@ using Image2Excel.Core.Internal;
 using Image2Excel.Core.Metadata;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Processors.Quantization;
 
 namespace Image2Excel.Core;
 
@@ -14,7 +16,7 @@ public class PackageFileCreator : IDisposable
     private readonly Dictionary<string, int> _cellStyleId = new();
     private readonly Image<Rgba32> _image;
     private bool _disposed;
-    
+
     public PackageFileCreator(string inputImagePath)
     {
         // Get a non-existing temporary directory name
@@ -255,6 +257,45 @@ public class PackageFileCreator : IDisposable
             throw new ArgumentException("File already existed");
 
         ZipFile.CreateFromDirectory(TempDirectoryPath, filePath);
+    }
+
+    public void QuantizeImage(QuantizeMethod quantizeMethod, DitherMethod ditherMethod, float ditherScale)
+    {
+        var dither = ditherMethod switch
+        {
+            DitherMethod.Bayer2x2 => KnownDitherings.Bayer2x2,
+            DitherMethod.Ordered3x3 => KnownDitherings.Ordered3x3,
+            DitherMethod.Bayer4x4 => KnownDitherings.Bayer4x4,
+            DitherMethod.Bayer8x8 => KnownDitherings.Bayer8x8,
+            DitherMethod.Bayer16x16 => KnownDitherings.Bayer16x16,
+            DitherMethod.Atkinson => KnownDitherings.Atkinson,
+            DitherMethod.Burks => KnownDitherings.Burks,
+            DitherMethod.FloydSteinberg => KnownDitherings.FloydSteinberg,
+            DitherMethod.JarvisJudiceNinke => KnownDitherings.JarvisJudiceNinke,
+            DitherMethod.Sierra2 => KnownDitherings.Sierra2,
+            DitherMethod.Sierra3 => KnownDitherings.Sierra3,
+            DitherMethod.SierraLite => KnownDitherings.SierraLite,
+            DitherMethod.StevensonArce => KnownDitherings.StevensonArce,
+            DitherMethod.Stucki => KnownDitherings.Stucki,
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(ditherMethod), ditherMethod, "Unknown dither method")
+        };
+        QuantizerOptions options = new()
+        {
+            Dither = dither,
+            DitherScale = ditherScale
+        };
+        IQuantizer quantizer = quantizeMethod switch
+        {
+            QuantizeMethod.Octree => new OctreeQuantizer(options),
+            QuantizeMethod.Wu => new WuQuantizer(options),
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(quantizeMethod), quantizeMethod, "Unknown quantize method")
+        };
+        _image.Mutate(context =>
+        {
+            context.Quantize(quantizer);
+        });
     }
 
     private void ReleaseUnmanagedResources()
