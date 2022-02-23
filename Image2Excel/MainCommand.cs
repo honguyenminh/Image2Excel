@@ -109,7 +109,7 @@ internal class MainCommand
                 _logger.LogError("Image file exceeded Excel's limitations.");
                 _logger.Log(LogLevel.None, e.Message);
 
-                Console.Write("Try again with color quantizing? [Y/n]: ");
+                Console.Write("******  Try again with color quantizing? [Y/n]: ");
                 string ans = Console.ReadLine()!.ToLower().Trim();
                 if (ans != "y" && ans != "")
                 {

@@ -79,8 +79,7 @@ public class ConsoleLogger
         {
             ReadOnlySpan<char> span = message;
             int lineLength = Console.WindowWidth - head.Length;
-            WriteSpan(span[..(lineLength - 1)]);
-            Console.WriteLine();
+            WriteSpan(span[..lineLength]);
             int i = lineLength;
             while (i < message.Length)
             {
@@ -88,15 +87,15 @@ public class ConsoleLogger
                 (int _, int top) = Console.GetCursorPosition();
                 Console.SetCursorPosition(head.Length, top);
                 // last line, just print till the end
-                if (message.Length - i  >= message.Length % lineLength)
+                if (message.Length - i  <= message.Length % lineLength)
                 {
                     WriteSpan(span[i..]);
+                    if (message.Length - i == lineLength) break;
                     if (newLine) Console.WriteLine();
                     break;
                 }
-                int endPos = i + lineLength - 1;
+                int endPos = i + lineLength;
                 WriteSpan(span[i..endPos]);
-                Console.WriteLine();
                 i += lineLength;
             }
         }
