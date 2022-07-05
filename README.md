@@ -5,7 +5,7 @@ Yes, every cell is a pixel in your image. Mind-blowing, right?
 ## Limitations
 - **Your source image should have at most 256 different colors to keep the same color**  
 This is due to Excel's limitation of maximum 256 different fill styles.  
-**Update: Now the app can use normal image too, but the image will be quantized (indexed color) to 256 color before converting**
+**Update: Now the app can process normal images (more than 256 colors) too, BUT the image will be quantized (indexed color, basically color downscaling) to 256 colors before being converted. This might make your image look a bit different from the original (like those GIFs eh?). Try out different quantizing algorithm to see which one is better.**
 - **Your source image must have a resolution under 1,048,576 x 16,384**  
 But in practice this rarely ever becomes a problem.
 - **Can only write to .xlsx OpenOfficeXML format**
