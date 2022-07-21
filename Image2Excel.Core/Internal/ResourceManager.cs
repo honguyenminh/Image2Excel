@@ -35,10 +35,8 @@ public static class ResourceManager
 
     public static void WriteResourceToFile(string resourcePath, string filePath)
     {
-        // TODO: use below method
-        using var resourceStream = GetResourceStream(resourcePath);
         using var fileStream = File.OpenWrite(filePath);
-        resourceStream.CopyTo(fileStream);
+        WriteResourceToStream(resourcePath, fileStream);
     }
     public static void WriteResourceToStream(string resourcePath, Stream stream)
     {

@@ -14,6 +14,7 @@ internal class MainCommand
         _version = version;
         _logger = logger;
     }
+
     public void Command(MainParams p)
     {
         _logger.LowestLogLevel = p.Silent ? LogLevel.Warning : LogLevel.Information;
