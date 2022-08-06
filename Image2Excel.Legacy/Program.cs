@@ -6,7 +6,7 @@ public static class Program
 {
     private static void Main(string[] args)
     {
-        Version version = new();
+        var version = Core.Metadata.Version.Default;
         Console.WriteLine("Image2Excel.Legacy " + version.VersionString);
         Console.WriteLine("GitHub: https://github.com/honguyenminh/Image2Excel.Legacy");
         if (version.IsPreRelease)

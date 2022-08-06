@@ -2,11 +2,11 @@
 using System.IO.Compression;
 using System.Text;
 using Image2Excel.Core.Internal;
-using Image2Excel.Core.Metadata;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Processing.Processors.Quantization;
+using Version = Image2Excel.Core.Metadata.Version;
 
 namespace Image2Excel.Core;
 
@@ -39,15 +39,15 @@ public class PackageFileCreator : IDisposable
         TempDirectoryPath = dirInfo.FullName;
     }
 
-    public void WriteMetadata(BaseVersion baseVersion)
+    public void WriteMetadata(Version version)
     {
         InitDirectories();
-        InitGlobalScopedFile(baseVersion);
+        InitGlobalScopedFile(version);
         InitWorkbook();
     }
     public void WriteMetadata()
     {
-        WriteMetadata(new DefaultVersion());
+        WriteMetadata(Version.Default);
     }
     
     /// <summary>
@@ -66,7 +66,7 @@ public class PackageFileCreator : IDisposable
     /// <summary>
     /// Write necessary global-scoped metadata files
     /// </summary>
-    private void InitGlobalScopedFile(BaseVersion baseVersion)
+    private void InitGlobalScopedFile(Version version)
     {
         // Write all literal metadata files (no change needed, just copy and paste)
         ResourceManager.WriteResourceToFile(@"FileInit..rels", 
@@ -76,7 +76,7 @@ public class PackageFileCreator : IDisposable
 
         // Write metadata files with replaced content
         string appMetadata = ResourceManager.GetResourceContent("FileInit.app.xml");
-        appMetadata = appMetadata.Replace("|Ver|", $"{baseVersion.Major}.{baseVersion.Minor}");
+        appMetadata = appMetadata.Replace("|Ver|", $"{version.Major}.{version.Minor}");
         File.WriteAllText(Path.Join(TempDirectoryPath, "docProps", "app.xml"), appMetadata);
 
         StringBuilder coreMetadata = new(ResourceManager.GetResourceContent("FileInit.core.xml"));

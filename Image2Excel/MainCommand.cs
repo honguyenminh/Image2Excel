@@ -2,23 +2,24 @@ using System.Data;
 using Image2Excel.CommandLine;
 using Image2Excel.Core;
 using Microsoft.Extensions.Logging;
+using Version = Image2Excel.Core.Metadata.Version;
 
 namespace Image2Excel;
 
 internal class MainCommand
 {
-    private readonly Version _version;
     private readonly ConsoleLogger _logger;
-    public MainCommand(Version version, ConsoleLogger logger)
+    private readonly Version _version;
+    public MainCommand(ConsoleLogger logger, Version version)
     {
-        _version = version;
         _logger = logger;
+        _version = version;
     }
 
     public void Command(MainParams p)
     {
         _logger.LowestLogLevel = p.Silent ? LogLevel.Warning : LogLevel.Information;
-        _logger.LogInformation($"Image2Excel {_version.VersionString}");
+        _logger.LogInformation($"Image2Excel CLI {_version.VersionString}");
 #if DEBUG
         Console.WriteLine("--------------------DEBUG BUILD--------------------");
 #endif
