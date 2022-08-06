@@ -62,12 +62,10 @@ internal class MainCommand
             catch (UnauthorizedAccessException e)
             {
                 _logger.LogError("Can't overwrite output file, not enough permission or is read-only");
-                _logger.Log(LogLevel.None, $"Error message: {e.Message}");
+                _logger.LogError($"Error message: {e.Message}", logHead: false);
             }
         }
-
-
-
+        
         try
         {
             PackageFileCreator package;
@@ -79,37 +77,37 @@ internal class MainCommand
             {
                 // Too many colors
                 _logger.LogError("Image file exceeded Excel's limitations.");
-                _logger.Log(LogLevel.None, e.Message);
+                _logger.LogError(e.Message, emptyHead: true);
                 _logger.LogInformation("Geez, what is that image?");
                 return;
             }
 
-            _logger.Log(LogLevel.Information, "Writing metadata...", false);
+            _logger.LogInformation("Writing metadata...", false);
             package.WriteMetadata(_version);
-            Console.WriteLine(" Done.");
+            _logger.LogInformation(" Done.", logHead: false);
 
             _logger.LogInformation($"Temp folder is at: {package.TempDirectoryPath}");
 
-            WriteStylesAgain: // I am sorry
+            WriteStylesAgain:
             if (p.QuantizeImage)
             {
-                _logger.Log(LogLevel.Information, "Quantizing color...", false);
+                _logger.LogInformation("Quantizing color...", false);
                 package.QuantizeImage(p.QuantizeMethod, p.DitherMethod, p.DitherScale);
-                Console.WriteLine(" Done.");
+                _logger.LogInformation(" Done.", logHead: false);
             }
 
-            _logger.Log(LogLevel.Information, "Writing styles...", false);
+            _logger.LogInformation("Writing styles...", false);
             try
             {
                 package.WriteStyles();
-                Console.WriteLine(" Done.");
+                _logger.LogInformation(" Done.", logHead: false);
             }
             catch (ArgumentOutOfRangeException e)
             {
                 // Too many colors
-                Console.WriteLine(" FAILED.");
-                _logger.LogError("Image file exceeded Excel's limitations.");
-                _logger.Log(LogLevel.None, e.Message);
+                _logger.LogInformation(" FAILED.", logHead: false);
+                _logger.LogError("Failed writing styles. Image file exceeded Excel's limitations.");
+                _logger.LogError(e.Message);
 
                 Console.Write("******  Try again with color quantizing? [Y/n]: ");
                 string ans = Console.ReadLine()!.ToLower().Trim();
@@ -123,27 +121,27 @@ internal class MainCommand
                 goto WriteStylesAgain;
             }
 
-            _logger.Log(LogLevel.Information, "Writing sheet...", false);
+            _logger.LogInformation("Writing sheet...", false);
             package.WriteSheet();
-            Console.WriteLine(" Done.");
+            _logger.LogInformation(" Done.", logHead: false);
 
-            _logger.Log(LogLevel.Information, "Compressing to package...", false);
+            _logger.LogInformation("Compressing to package...", false);
             package.Save(p.OutputPath);
-            Console.WriteLine(" Done.");
+            _logger.LogInformation(" Done.", logHead: false);
 
-            _logger.Log(LogLevel.Information, "Cleaning up temp folder...", false);
+            _logger.LogInformation("Cleaning up temp folder...", false);
             package.Dispose();
-            Console.WriteLine(" Done.");
+            _logger.LogInformation(" Done.", logHead: false);
 
             _logger.LogInformation("All done, my master! owo");
         }
         catch (Exception e)
         {
-            Console.WriteLine(" FAILED.");
+            _logger.LogInformation(" FAILED.", logHead: false);
             _logger.LogError("Oopsie! An unknown exception has been thrown.");
-            _logger.LogError("We don't know what went wrong yet, but here's the details:");
-            _logger.Log(LogLevel.None, e.Message);
-            Console.WriteLine("My dearest apologies, master~~"); // man this is pure cringe
+            _logger.LogError("We don't know what went wrong yet, but here's the details:", emptyHead: true);
+            _logger.LogError(e.Message);
+            _logger.LogError("My dearest apologies, master~~"); // man this is pure cringe
         }
     }
 }
