@@ -1,12 +1,12 @@
 using System.Reflection;
 using System.Resources;
 
-namespace Image2Excel;
+namespace Image2Excel.Core.Internal;
 
-internal static class ResourceManager
+public static class ResourceManager
 {
-    private const string ResPathPrefix = "Image2Excel.Resource.";
-    private static readonly Assembly s_assembly = typeof(Program).Assembly;
+    private const string ResPathPrefix = "Image2Excel.Core.Resource.";
+    private static readonly Assembly s_assembly = typeof(ResourceManager).Assembly;
 
     /// <summary>
     /// Get the stream to an embedded resource inside the assembly
@@ -35,9 +35,8 @@ internal static class ResourceManager
 
     public static void WriteResourceToFile(string resourcePath, string filePath)
     {
-        using var resourceStream = GetResourceStream(resourcePath);
         using var fileStream = File.OpenWrite(filePath);
-        resourceStream.CopyTo(fileStream);
+        WriteResourceToStream(resourcePath, fileStream);
     }
     public static void WriteResourceToStream(string resourcePath, Stream stream)
     {

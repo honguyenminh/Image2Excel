@@ -1,16 +1,23 @@
+﻿using System.Data;
+using System.IO.Compression;
 using System.Text;
+using Image2Excel.Core.Internal;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using System.IO.Compression;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Processors.Quantization;
+using Version = Image2Excel.Core.Metadata.Version;
 
-namespace Image2Excel;
+namespace Image2Excel.Core;
 
-public class ExcelHandler : IDisposable
+public class PackageFileCreator : IDisposable
 {
     public string TempDirectoryPath { get; }
     private readonly Dictionary<string, int> _cellStyleId = new();
-    
-    public ExcelHandler()
+    private readonly Image<Rgba32> _image;
+    private bool _disposed;
+
+    public PackageFileCreator(string inputImagePath)
     {
         // Get a non-existing temporary directory name
         do
@@ -18,15 +25,31 @@ public class ExcelHandler : IDisposable
             // Good luck making a duplicate folder of this.
             // I mean it, good luck. You also need to time it right owo.
             TempDirectoryPath = $"Image2Excel_{Guid.NewGuid()}_{DateTime.Now.ToString("d_HH-mm-ss-fff")}";
-        } while (Directory.Exists(TempDirectoryPath));
+        }
+        while (Directory.Exists(TempDirectoryPath));
+
+        _image = Image.Load<Rgba32>(inputImagePath);
+        if (_image.Height > 16_384 || _image.Width > 1_048_576)
+        {
+            Dispose();
+            throw new ConstraintException("Image is too big. Maximum resolution 1,048,576 x 16,384.");
+        }
 
         var dirInfo = Directory.CreateDirectory(TempDirectoryPath);
         TempDirectoryPath = dirInfo.FullName;
-        InitDirectories();
-        InitGlobalScopedFile();
-        InitWorkbook();
     }
 
+    public void WriteMetadata(Version version)
+    {
+        InitDirectories();
+        InitGlobalScopedFile(version);
+        InitWorkbook();
+    }
+    public void WriteMetadata()
+    {
+        WriteMetadata(Version.Default);
+    }
+    
     /// <summary>
     /// Create needed directories
     /// </summary>
@@ -43,17 +66,17 @@ public class ExcelHandler : IDisposable
     /// <summary>
     /// Write necessary global-scoped metadata files
     /// </summary>
-    private void InitGlobalScopedFile()
+    private void InitGlobalScopedFile(Version version)
     {
         // Write all literal metadata files (no change needed, just copy and paste)
-        ResourceManager.WriteResourceToFile("FileInit..rels", 
-            Path.Join(TempDirectoryPath, "_rels", ".rels"));
+        ResourceManager.WriteResourceToFile(@"FileInit..rels", 
+            Path.Join(TempDirectoryPath, @"_rels", @".rels"));
         ResourceManager.WriteResourceToFile("FileInit.[Content_Types].xml", 
             Path.Join(TempDirectoryPath, "[Content_Types].xml"));
 
         // Write metadata files with replaced content
         string appMetadata = ResourceManager.GetResourceContent("FileInit.app.xml");
-        appMetadata = appMetadata.Replace("|Ver|", $"{VersionTags.Major}.{VersionTags.Minor}");
+        appMetadata = appMetadata.Replace("|Ver|", $"{version.Major}.{version.Minor}");
         File.WriteAllText(Path.Join(TempDirectoryPath, "docProps", "app.xml"), appMetadata);
 
         StringBuilder coreMetadata = new(ResourceManager.GetResourceContent("FileInit.core.xml"));
@@ -68,37 +91,34 @@ public class ExcelHandler : IDisposable
     {
         ResourceManager.WriteResourceToFile("WorkbookInit.workbook.xml", 
             Path.Join(TempDirectoryPath, "xl", "workbook.xml"));
-        ResourceManager.WriteResourceToFile("WorkbookInit.workbook.xml.rels", 
-            Path.Join(TempDirectoryPath, "xl", "_rels", "workbook.xml.rels"));
+        ResourceManager.WriteResourceToFile(@"WorkbookInit.workbook.xml.rels", 
+            Path.Join(TempDirectoryPath, "xl", @"_rels", @"workbook.xml.rels"));
     }
-
-    // TODO: replace dimension in sheet1 head
+    
     /// <summary>
     /// Write styles file for the given image
     /// </summary>
-    /// <param name="image">Image to get color styles from</param>
     /// <exception cref="ArgumentOutOfRangeException">Too many colors in image</exception>
-    public void WriteStyles(Image<Rgba32> image)
+    public void WriteStyles()
     {
         // The fill/cell styles strings to write to styles.xml
         // TODO: save these to separate temp file
         StringBuilder fillStyles = new();
         StringBuilder cellStyles = new();
 
-        for (int y = 0; y < image.Height; y++)
+        for (int y = 0; y < _image.Height; y++)
         {
             // TODO: add default colors from excel here to avoid duplication
-            Span<Rgba32> row = image.GetPixelRowSpan(y);
-            for (int x = 0; x < image.Width; x++)
+            for (int x = 0; x < _image.Width; x++)
             {
                 if (_cellStyleId.Count > 256)
                 {
                     _cellStyleId.Clear();
-                    throw new ArgumentOutOfRangeException(nameof(image), 
+                    throw new ArgumentOutOfRangeException(nameof(_image), 
                         "Too many colors. Max is 256 (blame Excel owo)");
                 }
-
-                string hexCode = row[x].ToArgbHex();
+                
+                string hexCode = _image[x, y].ToArgbHex();
                 if (_cellStyleId.ContainsKey(hexCode)) continue;
 
                 fillStyles.Append("<fill><patternFill patternType=\"solid\"><fgColor rgb=\"");
@@ -145,7 +165,7 @@ public class ExcelHandler : IDisposable
         ResourceManager.WriteResourceToStream("Parts.styles.xml.bottom.txt", fileStream);
     }
 
-    public void WriteSheet(Image<Rgba32> image)
+    public void WriteSheet()
     {
         using var fileStream = File.OpenWrite(Path.Join(TempDirectoryPath, "xl", "worksheets", "sheet1.xml"));
         using StreamWriter writer = new(fileStream);
@@ -153,13 +173,13 @@ public class ExcelHandler : IDisposable
         ResourceManager.WriteResourceToStream("Parts.sheet1.xml.head.txt", fileStream);
 
         // Write sheet data to temp file
-        string? highestColumnName = WriteTempSheet(image, "sheet1.xml.temp");
+        string? highestColumnName = WriteTempSheet("sheet1.xml.temp");
 
         if (highestColumnName is null)
         {
             writer.Write("<dimension ref=\"A1:A1\"/>"); // Image is empty
         }
-        else writer.Write($"<dimension ref=\"A1:{highestColumnName}{image.Height}\"/>");
+        else writer.Write($"<dimension ref=\"A1:{highestColumnName}{_image.Height}\"/>");
         writer.Write("<sheetFormatPr defaultColWidth=\"1\" defaultRowHeight=\"5.95\" customHeight=\"1\"/>");
         writer.Flush();
 
@@ -177,29 +197,28 @@ public class ExcelHandler : IDisposable
     /// <summary>
     /// Write a temp file containing sheetData for a sheet inside the sheets folder
     /// </summary>
-    /// <param name="image">Image to get data from</param>
     /// <param name="tempName">Name of the temp file</param>
     /// <returns>The highest column name of the sheet</returns>
-    private string? WriteTempSheet(Image<Rgba32> image, string tempName)
+    private string? WriteTempSheet(string tempName)
     {
         using var fileStream = File.OpenWrite(Path.Join(TempDirectoryPath, "xl", "worksheets", tempName));
         using StreamWriter writer = new(fileStream);
 
         writer.Write("<sheetData>");
         char[] highestColChars = Array.Empty<char>();
-        for (int rowIndex = 0; rowIndex < image.Height; rowIndex++)
+        for (int y = 0; y < _image.Height; y++)
         {
-            writer.Write($"<row r=\"{rowIndex + 1}\">");
+            writer.Write($"<row r=\"{y + 1}\">");
             // Build cell list
             List<char> columnName = new() { 'A' };
-            Span<Rgba32> row = image.GetPixelRowSpan(rowIndex);
-            for (int x = 0; x < image.Width; x++)
+            
+            for (int x = 0; x < _image.Width; x++)
             {
-                string hexCode = row[x].ToArgbHex();
+                string hexCode = _image[x, y].ToArgbHex();
                 highestColChars = columnName.ToArray();
                 writer.Write("<c r=\"");
                 writer.Write(highestColChars);
-                writer.Write(rowIndex + 1);
+                writer.Write(y + 1);
                 writer.Write("\" s=\"");
                 writer.Write(_cellStyleId[hexCode]);
                 writer.Write("\"/>");
@@ -236,12 +255,54 @@ public class ExcelHandler : IDisposable
     {
         if (File.Exists(filePath))
             throw new ArgumentException("File already existed");
-        
+
         ZipFile.CreateFromDirectory(TempDirectoryPath, filePath);
+    }
+
+    public void QuantizeImage(QuantizeMethod quantizeMethod, DitherMethod ditherMethod, float ditherScale)
+    {
+        var dither = ditherMethod switch
+        {
+            DitherMethod.Bayer2x2 => KnownDitherings.Bayer2x2,
+            DitherMethod.Ordered3x3 => KnownDitherings.Ordered3x3,
+            DitherMethod.Bayer4x4 => KnownDitherings.Bayer4x4,
+            DitherMethod.Bayer8x8 => KnownDitherings.Bayer8x8,
+            DitherMethod.Bayer16x16 => KnownDitherings.Bayer16x16,
+            DitherMethod.Atkinson => KnownDitherings.Atkinson,
+            DitherMethod.Burks => KnownDitherings.Burks,
+            DitherMethod.FloydSteinberg => KnownDitherings.FloydSteinberg,
+            DitherMethod.JarvisJudiceNinke => KnownDitherings.JarvisJudiceNinke,
+            DitherMethod.Sierra2 => KnownDitherings.Sierra2,
+            DitherMethod.Sierra3 => KnownDitherings.Sierra3,
+            DitherMethod.SierraLite => KnownDitherings.SierraLite,
+            DitherMethod.StevensonArce => KnownDitherings.StevensonArce,
+            DitherMethod.Stucki => KnownDitherings.Stucki,
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(ditherMethod), ditherMethod, "Unknown dither method")
+        };
+        QuantizerOptions options = new()
+        {
+            Dither = dither,
+            DitherScale = ditherScale
+        };
+        IQuantizer quantizer = quantizeMethod switch
+        {
+            QuantizeMethod.Octree => new OctreeQuantizer(options),
+            QuantizeMethod.Wu => new WuQuantizer(options),
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(quantizeMethod), quantizeMethod, "Unknown quantize method")
+        };
+        _image.Mutate(context =>
+        {
+            context.Quantize(quantizer);
+        });
     }
 
     private void ReleaseUnmanagedResources()
     {
+        if (_disposed) return;
+        _disposed = true;
+        _image.Dispose();
         if (Directory.Exists(TempDirectoryPath))
             Directory.Delete(TempDirectoryPath, true);
     }
@@ -251,7 +312,7 @@ public class ExcelHandler : IDisposable
         ReleaseUnmanagedResources();
         GC.SuppressFinalize(this);
     }
-    ~ExcelHandler()
+    ~PackageFileCreator()
     {
         ReleaseUnmanagedResources();
     }

@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <StartupObject>Image2Excel.Legacy.Program</StartupObject>
+    <Version>0.1</Version>
+    <Authors>honguyenminh</Authors>
+    <Copyright>GPLv3</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/honguyenminh/Image2Excel</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/honguyenminh/Image2Excel</RepositoryUrl>
+    <RepositoryType>GPLv3</RepositoryType>
+    <PackageReleaseNotes>THIS APP HAS SUPER OWO POWER</PackageReleaseNotes>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath />
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Image2Excel.Core\Image2Excel.Core.csproj" />
+  </ItemGroup>
+
+</Project>
